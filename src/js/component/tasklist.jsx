@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types";
 
-const ListaTareas = ({ taskList, handleDelete, contador }) => {
+const ListaTareas = ({ taskList, handleDelete }) => {
 	return (
 		<>
 			{taskList.map((item, index) => (
@@ -26,7 +26,6 @@ const ListaTareas = ({ taskList, handleDelete, contador }) => {
 ListaTareas.propTypes = {
 	taskList: PropTypes.array,
 	handleDelete: PropTypes.func,
-	contador: PropTypes.number,
 };
 
 export default ListaTareas;

@@ -65,7 +65,6 @@ const Home = () => {
 						<ListaTareas
 							taskList={taskList}
 							handleDelete={handleDelete}
-							contador={contador}
 						/>
 						{contador != 0 && (
 							<div className="mt-2 contador">
