@@ -1,34 +1,117 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import ListaTareas from "./tasklist.jsx";
 //create your first component
 
+const initialState = { label: "", done: false };
+
 const Home = () => {
-	const [task, setTask] = useState("");
+	const [task, setTask] = useState(initialState);
 	const [taskList, setTaskList] = useState([]);
 	const [error, setError] = useState(false);
-	const [contador, setcontador] = useState("");
 
 	const handleChangeTask = (event) => {
-		setTask(event.target.value);
+		setTask({ ...task, [event.target.name]: event.target.value });
 	};
 
-	const handleAddTask = () => {
-		if (task.trim() != "") {
-			setTaskList([...taskList, task]);
-			setTask("");
-			setError(false);
-			setcontador(taskList.length + 1);
-		} else {
-			setError(true);
+	//POST
+	async function AddTask() {
+		try {
+			let response = await fetch(
+				"https://assets.breatheco.de/apis/fake/todos/user/DayannaGarcia",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify([]),
+				}
+			);
+			if (response.ok) {
+				getTask();
+			} else {
+				alert(`Ha fallado: ${response.status}`);
+			}
+		} catch (error) {
+			console.log(error);
 		}
-	};
+	}
 
-	const handleDelete = (id) => {
+	//GET
+	async function getTask() {
+		try {
+			let response = await fetch(
+				"https://assets.breatheco.de/apis/fake/todos/user/DayannaGarcia"
+			);
+			let results = await response.json();
+			if (response.ok) {
+				setTaskList(results);
+			} else {
+				AddTask();
+			}
+		} catch (error) {
+			console.log(error);
+		}
+	}
+
+	//PUT
+	//agregar tarea
+	async function updateTask() {
+		try {
+			if (task.label.trim() != "") {
+				let response = await fetch(
+					"https://assets.breatheco.de/apis/fake/todos/user/DayannaGarcia",
+					{
+						method: "PUT",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify([...taskList, task]),
+					}
+				);
+				if (response.ok) {
+					getTask();
+					setError(false);
+					setTask(initialState);
+				} else {
+					console.log(response.status);
+				}
+			} else {
+				setError(true);
+				return;
+			}
+		} catch {
+			console.log(error);
+		}
+	}
+
+	//PUT
+	//eliminar tarea
+	async function deleteTask(id) {
 		let newListTask = taskList.filter((item, index) => index != id);
-
-		setcontador(newListTask.length);
 		setTaskList(newListTask);
-	};
+		try {
+			let response = await fetch(
+				"https://assets.breatheco.de/apis/fake/todos/user/DayannaGarcia",
+				{
+					method: "PUT",
+					headers: {
+						"Content-Type": "application/json",
+					},
+					body: JSON.stringify(newListTask),
+				}
+			);
+			if (response.ok) {
+				getTask();
+			}
+		} catch {
+			console.log(error);
+		}
+	}
+
+	useEffect(() => {
+		getTask();
+	}, []);
+
 	return (
 		<>
 			<div className="container mt-4 letter ">
@@ -41,9 +124,9 @@ const Home = () => {
 									<input
 										type="text"
 										className="form-control border-0"
-										name="nametask"
+										name="label"
 										placeholder="What needs to be done?"
-										value={task}
+										value={task.label}
 										onChange={handleChangeTask}
 									/>
 								</div>
@@ -51,7 +134,7 @@ const Home = () => {
 									<button
 										className="btn btn-outline-success"
 										type="button"
-										onClick={handleAddTask}>
+										onClick={updateTask}>
 										<i className="fas fa-check"></i>
 									</button>
 								</div>
@@ -64,18 +147,13 @@ const Home = () => {
 						)}
 						<ListaTareas
 							taskList={taskList}
-							handleDelete={handleDelete}
+							deleteTask={deleteTask}
 						/>
-						{contador != 0 && (
-							<div className="mt-2 contador">
-								{contador} items left
-							</div>
-						)}
+						{`${taskList.length} item left`}
 					</div>
 				</div>
 			</div>
 		</>
 	);
 };
-
 export default Home;
